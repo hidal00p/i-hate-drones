@@ -1,4 +1,4 @@
-SRC := bee_rl/*.py
+SRC := bee_rl/*.py bee_rl/*/*.py
 TEST_SRC := tests/unit/*.py tests/integration/*.py
 
 fmt:
