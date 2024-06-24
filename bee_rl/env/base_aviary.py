@@ -578,7 +578,7 @@ class BaseAviary(gym.Env):
         self.DRONE_IDS = np.array(
             [
                 p.loadURDF(
-                    get_assets_dir() / self.URDF,
+                    str(get_assets_dir() / self.URDF),
                     self.INIT_XYZS[i, :],
                     p.getQuaternionFromEuler(self.INIT_RPYS[i, :]),
                     flags=p.URDF_USE_INERTIA_FROM_FILE,
@@ -1115,7 +1115,7 @@ class BaseAviary(gym.Env):
         files in folder `assets/`.
 
         """
-        URDF_TREE = etxml.parse(get_assets_dir() / self.URDF).getroot()
+        URDF_TREE = etxml.parse(str(get_assets_dir() / self.URDF)).getroot()
         M = float(URDF_TREE[1][0][1].attrib["value"])
         L = float(URDF_TREE[0].attrib["arm"])
         THRUST2WEIGHT_RATIO = float(URDF_TREE[0].attrib["thrust2weight"])
