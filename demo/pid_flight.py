@@ -7,12 +7,13 @@ from bee_rl.utils import sync
 
 
 def fly():
-    Rxy, Z = 0.5, 0.5
+    Rxy = 0.5
+    Z = 0.5
     Rz = 0.05 * Z
-    phys_engine_freq_hz = 1000  # 1ms
-    pid_freq_hz = 200  # 5 ms
     phi_0 = 0.0
     theta_0 = 0.0
+    phys_engine_freq_hz = 1000  # 1ms
+    pid_freq_hz = 200  # 5 ms
     init_pos = np.array([np.cos(phi_0), np.sin(phi_0), np.sin(theta_0)]).reshape((1, 3))
 
     env = CtrlAviary(
@@ -65,7 +66,6 @@ def fly():
 
             # Sync the simulation
             sync(i, start_time, env.CTRL_TIMESTEP)
-
             i += 1
     except KeyboardInterrupt:
         pass
