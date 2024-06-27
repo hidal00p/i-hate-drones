@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class ObstacleGenerator:
+class ArenaElementGenerator:
 
     def __init__(self, region: tuple[float, float], n: int = 10):
         self.region = region

@@ -4,7 +4,7 @@ import numpy as np
 from bee_rl.env import CtrlAviary
 from bee_rl.control import PIDControl
 from bee_rl.utils import sync
-from bee_rl.obstacles import ObstacleGenerator
+from bee_rl.arena_elements import ArenaElementGenerator
 
 
 def fly():
@@ -22,7 +22,8 @@ def fly():
         pyb_freq=phys_engine_freq_hz,
         ctrl_freq=pid_freq_hz,
         gui=True,
-        obstacle_generator=ObstacleGenerator((-1, 1), 10),
+        obstacle_generator=ArenaElementGenerator((-1, 1), 10),
+        target_generator=ArenaElementGenerator((-1, 1), 1),
     )
     pid = PIDControl()
 

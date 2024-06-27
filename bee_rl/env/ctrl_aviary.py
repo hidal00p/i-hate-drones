@@ -6,7 +6,7 @@ from gymnasium import spaces
 
 from . import BaseAviary
 from bee_rl.enums import DroneModel, Physics
-from bee_rl.obstacles import ObstacleGenerator
+from bee_rl.arena_elements import ArenaElementGenerator
 from bee_rl.utils import get_assets_dir
 
 
@@ -23,7 +23,8 @@ class CtrlAviary(BaseAviary):
         physics: Physics = Physics.PYB,
         pyb_freq: int = 1000,  # 1ms
         ctrl_freq: int = 200,  # 5ms
-        obstacle_generator: Optional[ObstacleGenerator] = None,
+        obstacle_generator: Optional[ArenaElementGenerator] = None,
+        target_generator: Optional[ArenaElementGenerator] = None,
         gui=False,
         record=False,
         user_debug_gui=True,
@@ -45,6 +46,7 @@ class CtrlAviary(BaseAviary):
             output_folder=output_folder,
         )
         self.obstacle_generator = obstacle_generator
+        self.target_generator = target_generator
 
     @property
     def _action_space(self):
@@ -225,17 +227,26 @@ class CtrlAviary(BaseAviary):
             "answer": 42
         }  #### Calculated by the Deep Thought supercomputer in 7.5M years
 
-    def _add_obstacles(self):
+    def _add_element_to_aviary(
+        self, urdf_path: str, element_generator: ArenaElementGenerator
+    ):
         z = 0.2
         engine_cli = self.CLIENT
-        obstacle_urdf_path = str(get_assets_dir() / "column.urdf")
-        for obstacle_xy in self.obstacle_generator.obstacles:
+        for obstacle_xy in element_generator.obstacles:
             p.loadURDF(
-                obstacle_urdf_path,
+                urdf_path,
                 list(obstacle_xy) + [z],
                 p.getQuaternionFromEuler([0, 0, 0]),
                 engine_cli,
             )
+
+    def _add_obstacles(self):
+        obstacle_urdf_path = str(get_assets_dir() / "column.urdf")
+        self._add_element_to_aviary(obstacle_urdf_path, self.obstacle_generator)
+
+    def _add_target(self):
+        target_urdf_path = "duck_vhacd.urdf"
+        self._add_element_to_aviary(target_urdf_path, self.target_generator)
 
     def reset(self, seed: int = None, options: dict = None):
         obs, info = super().reset(seed, options)
@@ -243,5 +254,9 @@ class CtrlAviary(BaseAviary):
         if self.obstacle_generator:
             self.obstacle_generator.reset()
             self._add_obstacles()
+
+        if self.target_generator:
+            self.target_generator.reset()
+            self._add_target()
 
         return obs, info
