@@ -1,9 +1,10 @@
 import time
+import logging
 import numpy as np
 
 from bee_rl.env import CtrlAviary
 from bee_rl.control import PIDControl
-from bee_rl.utils import sync
+from bee_rl.utils import sync, configure_telemetry_logger, LOGGER_NAME
 from bee_rl.arena_elements import ArenaElementGenerator
 
 
@@ -22,8 +23,8 @@ def fly():
         pyb_freq=phys_engine_freq_hz,
         ctrl_freq=pid_freq_hz,
         gui=True,
-        obstacle_generator=ArenaElementGenerator((-1, 1), 10),
-        target_generator=ArenaElementGenerator((-1, 1), 1),
+        # obstacle_generator=ArenaElementGenerator((-1, 1), 10),
+        # target_generator=ArenaElementGenerator((-1, 1), 1),
     )
     pid = PIDControl()
 
@@ -31,8 +32,10 @@ def fly():
     action = np.zeros((1, 4))
 
     i = 0
-    desired_speed = 0.25 * 3.6
+    desired_speed = 0.1 * 3.6
     env.reset()
+
+    logger = logging.getLogger(LOGGER_NAME)
     try:
         while True:
 
@@ -71,6 +74,9 @@ def fly():
             # Sync the simulation
             sync(i, start_time, env.CTRL_TIMESTEP)
             i += 1
+
+            xyz = obs[0, 0:3]
+            logger.info(f"{xyz[0]} {xyz[1]} {xyz[2]}")
     except KeyboardInterrupt:
         pass
     finally:
@@ -79,4 +85,5 @@ def fly():
 
 
 if __name__ == "__main__":
+    configure_telemetry_logger()
     fly()
