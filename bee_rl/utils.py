@@ -1,6 +1,10 @@
 import os
+import logging
+import logging.handlers
 import time
 import pathlib
+
+LOGGER_NAME = os.getenv("LOGGER_NAME", "telemetry_logger")
 
 
 def add(a: float, b: float):
@@ -40,3 +44,15 @@ def sync(i, start_time, timestep):
         elapsed = time.time() - start_time
         if elapsed < (i * timestep):
             time.sleep(timestep * i - elapsed)
+
+
+def configure_telemetry_logger():
+    log_file = os.getenv("LOG_FILE", "telem.log")
+
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.setLevel(logging.INFO)
+    file_handler = logging.handlers.RotatingFileHandler(
+        filename=log_file, mode="w", maxBytes=30_000_000, backupCount=5
+    )
+    file_handler.setLevel(logging.INFO)
+    logger.addHandler(file_handler)
