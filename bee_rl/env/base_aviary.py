@@ -587,20 +587,12 @@ class BaseAviary(gym.Env):
                 for i in range(self.NUM_DRONES)
             ]
         )
-        #### Remove default damping #################################
-        # for i in range(self.NUM_DRONES):
-        #     p.changeDynamics(self.DRONE_IDS[i], -1, linearDamping=0, angularDamping=0)
+
         #### Show the frame of reference of the drone, note that ###
         #### It severly slows down the GUI #########################
         if self.GUI and self.USER_DEBUG:
             for i in range(self.NUM_DRONES):
                 self._show_drone_local_axes(i)
-        #### Disable collisions between drones' and the ground plane
-        #### E.g., to start a drone at [0,0,0] #####################
-        # for i in range(self.NUM_DRONES):
-        # p.setCollisionFilterPair(bodyUniqueIdA=self.PLANE_ID, bodyUniqueIdB=self.DRONE_IDS[i], linkIndexA=-1, linkIndexB=-1, enableCollision=0, physicsClientId=self.CLIENT)
-        if self.OBSTACLES:
-            self._add_obstacle()
 
     def _update_and_store_kinem_info(self):
         """Updates and stores the drones kinemaatic information.
@@ -1081,32 +1073,6 @@ class BaseAviary(gym.Env):
                 replaceItemUniqueId=int(self.Z_AX[nth_drone]),
                 physicsClientId=self.CLIENT,
             )
-
-    def _add_obstacle(self):
-        """Add obstacles to the environment.
-
-        These obstacles are loaded from standard URDF files included in Bullet.
-
-        """
-        p.loadURDF("samurai.urdf", physicsClientId=self.CLIENT)
-        p.loadURDF(
-            "duck_vhacd.urdf",
-            [-0.5, -0.5, 0.05],
-            p.getQuaternionFromEuler([0, 0, 0]),
-            physicsClientId=self.CLIENT,
-        )
-        p.loadURDF(
-            "cube_no_rotation.urdf",
-            [-0.5, -2.5, 0.5],
-            p.getQuaternionFromEuler([0, 0, 0]),
-            physicsClientId=self.CLIENT,
-        )
-        p.loadURDF(
-            "sphere2.urdf",
-            [0, 2, 0.5],
-            p.getQuaternionFromEuler([0, 0, 0]),
-            physicsClientId=self.CLIENT,
-        )
 
     def _parse_urdf_params(self):
         """Loads parameters from an URDF file.

@@ -80,7 +80,14 @@ class CtrlAviary(BaseAviary):
             The observation space, i.e., an ndarray of shape (NUM_DRONES, 20).
 
         """
-        #### Observation vector ### X        Y        Z       Q1   Q2   Q3   Q4   R       P       Y       VX       VY       VZ       WX       WY       WZ       P0            P1            P2            P3
+        # Observation vector
+        #
+        # Pos:                 X, Y, Z
+        # Orientation quat:    Q1, Q2, Q3, Q4
+        # Orientation eulr:    R, P, Y
+        # Vel vector:          VX, VY, VZ
+        # Angular vel vector:  WX, WY, WZ
+        # Propeler rpm :       P0, P1, P2, P3
         obs_lower_bound = np.array(
             [
                 [
