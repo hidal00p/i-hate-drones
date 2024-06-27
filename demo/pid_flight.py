@@ -4,6 +4,7 @@ import numpy as np
 from bee_rl.env import CtrlAviary
 from bee_rl.control import PIDControl
 from bee_rl.utils import sync
+from bee_rl.obstacles import ObstacleGenerator
 
 
 def fly():
@@ -21,6 +22,7 @@ def fly():
         pyb_freq=phys_engine_freq_hz,
         ctrl_freq=pid_freq_hz,
         gui=True,
+        obstacle_generator=ObstacleGenerator((-1, 1), 10),
     )
     pid = PIDControl()
 
@@ -29,6 +31,7 @@ def fly():
 
     i = 0
     desired_speed = 0.25 * 3.6
+    env.reset()
     try:
         while True:
 

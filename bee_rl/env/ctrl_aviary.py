@@ -1,8 +1,13 @@
+from typing import Optional
+
 import numpy as np
+import pybullet as p
 from gymnasium import spaces
 
 from . import BaseAviary
 from bee_rl.enums import DroneModel, Physics
+from bee_rl.obstacles import ObstacleGenerator
+from bee_rl.utils import get_assets_dir
 
 
 class CtrlAviary(BaseAviary):
@@ -18,42 +23,12 @@ class CtrlAviary(BaseAviary):
         physics: Physics = Physics.PYB,
         pyb_freq: int = 1000,  # 1ms
         ctrl_freq: int = 200,  # 5ms
+        obstacle_generator: Optional[ObstacleGenerator] = None,
         gui=False,
         record=False,
-        obstacles=False,
         user_debug_gui=True,
         output_folder="results",
     ):
-        """Initialization of an aviary environment for control applications.
-
-        Parameters
-        ----------
-        drone_model : DroneModel, optional
-            The desired drone type (detailed in an .urdf file in folder `assets`).
-        num_drones : int, optional
-            The desired number of drones in the aviary.
-        neighbourhood_radius : float, optional
-            Radius used to compute the drones' adjacency matrix, in meters.
-        initial_xyzs: ndarray | None, optional
-            (NUM_DRONES, 3)-shaped array containing the initial XYZ position of the drones.
-        initial_rpys: ndarray | None, optional
-            (NUM_DRONES, 3)-shaped array containing the initial orientations of the drones (in radians).
-        physics : Physics, optional
-            The desired implementation of PyBullet physics/custom dynamics.
-        pyb_freq : int, optional
-            The frequency at which PyBullet steps (a multiple of ctrl_freq).
-        ctrl_freq : int, optional
-            The frequency at which the environment steps.
-        gui : bool, optional
-            Whether to use PyBullet's GUI.
-        record : bool, optional
-            Whether to save a video of the simulation.
-        obstacles : bool, optional
-            Whether to add obstacles to the simulation.
-        user_debug_gui : bool, optional
-            Whether to draw the drones' axes and the GUI RPMs sliders.
-
-        """
         super().__init__(
             drone_model=drone_model,
             num_drones=num_drones,
@@ -65,10 +40,11 @@ class CtrlAviary(BaseAviary):
             ctrl_freq=ctrl_freq,
             gui=gui,
             record=record,
-            obstacles=obstacles,
+            obstacles=False,
             user_debug_gui=user_debug_gui,
             output_folder=output_folder,
         )
+        self.obstacle_generator = obstacle_generator
 
     @property
     def _action_space(self):
@@ -248,3 +224,24 @@ class CtrlAviary(BaseAviary):
         return {
             "answer": 42
         }  #### Calculated by the Deep Thought supercomputer in 7.5M years
+
+    def _add_obstacles(self):
+        z = 0.2
+        engine_cli = self.CLIENT
+        obstacle_urdf_path = str(get_assets_dir() / "column.urdf")
+        for obstacle_xy in self.obstacle_generator.obstacles:
+            p.loadURDF(
+                obstacle_urdf_path,
+                list(obstacle_xy) + [z],
+                p.getQuaternionFromEuler([0, 0, 0]),
+                engine_cli,
+            )
+
+    def reset(self, seed: int = None, options: dict = None):
+        obs, info = super().reset(seed, options)
+
+        if self.obstacle_generator:
+            self.obstacle_generator.reset()
+            self._add_obstacles()
+
+        return obs, info
