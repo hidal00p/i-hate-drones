@@ -239,7 +239,7 @@ class CtrlAviary(BaseAviary):
     ):
         z = 0.2
         engine_cli = self.CLIENT
-        for obstacle_xy in element_generator.obstacles:
+        for obstacle_xy in element_generator.elements:
             p.loadURDF(
                 urdf_path,
                 list(obstacle_xy) + [z],

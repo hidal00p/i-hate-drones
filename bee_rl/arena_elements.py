@@ -13,4 +13,4 @@ class ArenaElementGenerator:
         x = np.random.uniform(low, high, self.n)
         y = np.random.uniform(low, high, self.n)
 
-        self.obstacles = np.array([x, y]).reshape(self.n, 2)
+        self.elements = np.array([x, y]).reshape(self.n, 2)
