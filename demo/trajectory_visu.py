@@ -3,7 +3,7 @@ import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-from bee_rl.analytics.trajectory import Trajectory
+from bee_rl.analytics.trajectory import TrajectoryFrame
 
 
 def generate_ref_trajectory(
@@ -22,7 +22,7 @@ def visualize():
     traj_file_path = pathlib.Path("/Users/anton/home/rl/i-hate-drones/telem.log")
     assert traj_file_path.exists()
 
-    _, graph = Trajectory(traj_file_path).plot()
+    _, graph = TrajectoryFrame(traj_file_path).plot()
 
     x_ref, y_ref, z_ref = generate_ref_trajectory()
     graph.plot(x_ref, y_ref, z_ref)
