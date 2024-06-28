@@ -7,10 +7,6 @@ import pathlib
 LOGGER_NAME = os.getenv("LOGGER_NAME", "telemetry_logger")
 
 
-def add(a: float, b: float):
-    return a + b
-
-
 def get_assets_dir() -> pathlib.Path:
     """
     Retrieves the directory which contains the .urdf model
