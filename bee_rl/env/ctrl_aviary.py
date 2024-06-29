@@ -236,26 +236,35 @@ class CtrlAviary(BaseAviary):
 
     def _add_element_to_aviary(
         self, urdf_path: str, element_generator: ArenaElementGenerator
-    ):
+    ) -> list[int]:
         z = 0.2
         engine_cli = self.CLIENT
-        for obstacle_xy in element_generator.elements:
+
+        element_ids = [
             p.loadURDF(
                 urdf_path,
-                list(obstacle_xy) + [z],
+                list(element_xy) + [z],
                 p.getQuaternionFromEuler([0, 0, 0]),
                 engine_cli,
             )
+            for element_xy in element_generator.elements
+        ]
+
+        return element_ids
 
     def _add_obstacles(self):
         obstacle_urdf_path = str(get_assets_dir() / "column.urdf")
-        self._add_element_to_aviary(obstacle_urdf_path, self.obstacle_generator)
+        self.obstacle_ids = self._add_element_to_aviary(
+            obstacle_urdf_path, self.obstacle_generator
+        )
 
     def _add_target(self):
         target_urdf_path = "duck_vhacd.urdf"
-        self._add_element_to_aviary(target_urdf_path, self.target_generator)
+        self.target_id = self._add_element_to_aviary(
+            target_urdf_path, self.target_generator
+        )[0]
 
-    def reset(self, seed: int = None, options: dict = None):
+    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         obs, info = super().reset(seed, options)
 
         if self.obstacle_generator:
