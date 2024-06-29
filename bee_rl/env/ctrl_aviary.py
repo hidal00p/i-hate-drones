@@ -6,7 +6,7 @@ from gymnasium import spaces
 
 from . import BaseAviary
 from bee_rl.enums import DroneModel, Physics
-from bee_rl.arena_elements import ArenaElementGenerator
+from bee_rl.arena_elements import ElementGenerator
 from bee_rl.utils import get_assets_dir
 
 
@@ -23,8 +23,8 @@ class CtrlAviary(BaseAviary):
         physics: Physics = Physics.PYB,
         pyb_freq: int = 1000,  # 1ms
         ctrl_freq: int = 200,  # 5ms
-        obstacle_generator: Optional[ArenaElementGenerator] = None,
-        target_generator: Optional[ArenaElementGenerator] = None,
+        obstacle_generator: Optional[ElementGenerator] = None,
+        target_generator: Optional[ElementGenerator] = None,
         gui=False,
         record=False,
         user_debug_gui=True,
@@ -235,7 +235,7 @@ class CtrlAviary(BaseAviary):
         }  #### Calculated by the Deep Thought supercomputer in 7.5M years
 
     def _add_element_to_aviary(
-        self, urdf_path: str, element_generator: ArenaElementGenerator
+        self, urdf_path: str, element_generator: ElementGenerator
     ) -> list[int]:
         z = 0.2
         engine_cli = self.CLIENT
@@ -276,3 +276,13 @@ class CtrlAviary(BaseAviary):
             self._add_target()
 
         return obs, info
+
+    @property
+    def orientation_plane(self):
+        _, quat = p.getBasePositionAndOrientation(self.DRONE_IDS[0], self.CLIENT)
+        orientationMatrix = p.getMatrixFromQuaternion(quat)
+
+        xyz = np.vstack(
+            (orientationMatrix[0:3], orientationMatrix[3:6], orientationMatrix[6:9])
+        )
+        return xyz
