@@ -56,18 +56,18 @@ class Eyes:
         )
 
         self.observation[:] = 0
-        for idx, (obstacleId, _, _, hitPos, _) in enumerate(collision_measurement):
-            if obstacleId == -1:
+        for idx, (obstacle_id, _, _, hit_pos, _) in enumerate(collision_measurement):
+            if obstacle_id == -1:
                 continue
-            self.observation[idx] = np.linalg.norm(np.array(list(hitPos)) - our_pos)
+            self.observation[idx] = np.linalg.norm(np.array(hit_pos) - our_pos)
 
         return self.observation
 
     @property
     def observation_space(self) -> spaces.Box:
-        minObservationVector = np.full((self.vision_spec.segment_count,), 0.0)
+        minObservationVector = np.full(self.vision_spec.segment_count, 0.0)
         maxObservationVector = np.full(
-            (self.vision_spec.segment_count,), self.vision_spec.cutoff_distance_m
+            self.vision_spec.segment_count, self.vision_spec.cutoff_distance_m
         )
 
         return spaces.Box(
