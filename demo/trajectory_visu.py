@@ -8,7 +8,7 @@ from bee_rl.trajectory import Trajectory
 
 
 def generate_ref_trajectory() -> np.ndarray:
-    Rxy = 0.5
+    Rxy = 1.0
     Z = 0.5
     Rz = 0.1 * Z
     return Trajectory.get_rollercoaster(Rxy=Rxy, Rz=Rz, n_z=2, Z=Z)
