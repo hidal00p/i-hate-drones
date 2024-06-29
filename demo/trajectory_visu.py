@@ -3,19 +3,15 @@ import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-from bee_rl.analytics.trajectory import TrajectoryFrame
+from bee_rl.analytics.trajectory_frame import TrajectoryFrame
+from bee_rl.trajectory import Trajectory
 
 
-def generate_ref_trajectory(
-    density: int = 1000,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def generate_ref_trajectory() -> np.ndarray:
     Rxy = 0.5
     Z = 0.5
-    Rz = 0.05 * Z
-    phi = np.linspace(0, 2 * np.pi, density)
-    theta = 2 * phi
-    x, y, z = Rxy * np.cos(phi), Rxy * np.sin(phi), Z + Rz * np.sin(theta)
-    return x, y, z
+    Rz = 0.1 * Z
+    return Trajectory.get_rollercoaster(Rxy=Rxy, Rz=Rz, n_z=2, Z=Z)
 
 
 def visualize():
@@ -24,8 +20,8 @@ def visualize():
 
     _, graph = TrajectoryFrame(traj_file_path).plot()
 
-    x_ref, y_ref, z_ref = generate_ref_trajectory()
-    graph.plot(x_ref, y_ref, z_ref)
+    ref_trajectory = generate_ref_trajectory()
+    graph.plot(ref_trajectory.T[0], ref_trajectory.T[1], ref_trajectory.T[2])
 
     plt.show()
 
