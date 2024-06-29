@@ -1,17 +1,9 @@
 import pathlib
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from bee_rl.analytics.trajectory_frame import TrajectoryFrame
 from bee_rl.trajectory import Trajectory
-
-
-def generate_ref_trajectory() -> np.ndarray:
-    Rxy = 1.0
-    Z = 0.5
-    Rz = 0.1 * Z
-    return Trajectory.get_rollercoaster(Rxy=Rxy, Rz=Rz, n_z=2, Z=Z)
 
 
 def visualize():
@@ -20,7 +12,7 @@ def visualize():
 
     _, graph = TrajectoryFrame(traj_file_path).plot()
 
-    ref_trajectory = generate_ref_trajectory()
+    ref_trajectory = Trajectory.get_rollercoaster(n_z=4)
     graph.plot(ref_trajectory.T[0], ref_trajectory.T[1], ref_trajectory.T[2])
 
     plt.show()

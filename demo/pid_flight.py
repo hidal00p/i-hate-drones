@@ -8,13 +8,6 @@ from bee_rl.utils import sync, configure_telemetry_logger, LOGGER_NAME
 from bee_rl.trajectory import Trajectory
 
 
-def generate_ref_trajectory() -> np.ndarray:
-    Rxy = 1.0
-    Z = 0.5
-    Rz = 0.1 * Z
-    return Trajectory.get_rollercoaster(Rxy=Rxy, Rz=Rz, n_z=2, Z=Z)
-
-
 def fly():
     gui = False
     phys_engine_freq_hz = 1000  # 1ms
@@ -29,11 +22,11 @@ def fly():
         gui=gui,
     )
 
-    ref_trajectory = generate_ref_trajectory()
+    ref_trajectory = Trajectory.get_rollercoaster(n_z=4)
     desired_speed_ms = 0.5 * 3.6
     controller = PathFollower(ref_trajectory, desired_speed_ms, env.CTRL_TIMESTEP)
 
-    action = np.zeros((1, 4))
+    action = np.zeros((1, 4))  # RPM
     env.reset()
 
     start_time = time.time()
