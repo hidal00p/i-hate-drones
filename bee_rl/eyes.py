@@ -2,7 +2,6 @@ from typing import NamedTuple
 
 import numpy as np
 import pybullet as p
-from gymnasium import spaces
 
 
 class VisionSpec(NamedTuple):
@@ -66,12 +65,10 @@ class Eyes:
         return self.observation
 
     @property
-    def observation_space(self) -> spaces.Box:
-        minObservationVector = np.full(self.vision_spec.segment_count, 0.0)
-        maxObservationVector = np.full(
+    def observation_space(self) -> tuple[np.ndarray, np.ndarray]:
+        lower_bound = np.zeros(self.vision_spec.segment_count)
+        upper_bound = np.full(
             self.vision_spec.segment_count, self.vision_spec.cutoff_distance_m
         )
 
-        return spaces.Box(
-            low=minObservationVector, high=maxObservationVector, dtype=np.float32
-        )
+        return lower_bound, upper_bound

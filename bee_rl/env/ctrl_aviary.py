@@ -8,6 +8,7 @@ from . import BaseAviary
 from bee_rl.enums import DroneModel, Physics
 from bee_rl.arena_elements import ElementGenerator
 from bee_rl.utils import get_assets_dir
+from bee_rl.eyes import Eyes
 
 
 class CtrlAviary(BaseAviary):
@@ -15,8 +16,8 @@ class CtrlAviary(BaseAviary):
 
     def __init__(
         self,
+        eyes: Eyes = Eyes(),
         drone_model: DroneModel = DroneModel.CF2X,
-        num_drones: int = 1,
         neighbourhood_radius: float = np.inf,
         initial_xyzs=None,
         initial_rpys=None,
@@ -30,9 +31,12 @@ class CtrlAviary(BaseAviary):
         user_debug_gui=True,
         output_folder="results",
     ):
+        self.eyes = eyes
+        self.obstacle_generator = obstacle_generator
+        self.target_generator = target_generator
         super().__init__(
             drone_model=drone_model,
-            num_drones=num_drones,
+            num_drones=1,
             neighbourhood_radius=neighbourhood_radius,
             initial_xyzs=initial_xyzs,
             initial_rpys=initial_rpys,
@@ -45,8 +49,6 @@ class CtrlAviary(BaseAviary):
             user_debug_gui=user_debug_gui,
             output_folder=output_folder,
         )
-        self.obstacle_generator = obstacle_generator
-        self.target_generator = target_generator
 
     @property
     def _action_space(self):
@@ -55,18 +57,13 @@ class CtrlAviary(BaseAviary):
         Returns
         -------
         spaces.Box
-            An ndarray of shape (NUM_DRONES, 4) for the commanded RPMs.
+            An ndarray of shape (1, 4) for the commanded RPMs.
 
         """
         #### Action vector ######## P0            P1            P2            P3
-        act_lower_bound = np.array(
-            [[0.0, 0.0, 0.0, 0.0] for _ in range(self.NUM_DRONES)]
-        )
+        act_lower_bound = np.array([[0.0, 0.0, 0.0, 0.0]])
         act_upper_bound = np.array(
-            [
-                [self.MAX_RPM, self.MAX_RPM, self.MAX_RPM, self.MAX_RPM]
-                for _ in range(self.NUM_DRONES)
-            ]
+            [[self.MAX_RPM, self.MAX_RPM, self.MAX_RPM, self.MAX_RPM]]
         )
         return spaces.Box(low=act_lower_bound, high=act_upper_bound, dtype=np.float32)
 
@@ -77,7 +74,7 @@ class CtrlAviary(BaseAviary):
         Returns
         -------
         spaces.Box
-            The observation space, i.e., an ndarray of shape (NUM_DRONES, 20).
+            The observation space, i.e., an ndarray of shape (1, 20).
 
         """
         # Observation vector
@@ -87,7 +84,8 @@ class CtrlAviary(BaseAviary):
         # Orientation eulr:    R, P, Y
         # Vel vector:          VX, VY, VZ
         # Angular vel vector:  WX, WY, WZ
-        # Propeler rpm :       P0, P1, P2, P3
+        # Propeler rpm:        P0, P1, P2, P3
+        # Eyes segments:       Number of activated vision segments
         obs_lower_bound = np.array(
             [
                 [
@@ -112,7 +110,6 @@ class CtrlAviary(BaseAviary):
                     0.0,
                     0.0,
                 ]
-                for _ in range(self.NUM_DRONES)
             ]
         )
         obs_upper_bound = np.array(
@@ -139,25 +136,41 @@ class CtrlAviary(BaseAviary):
                     self.MAX_RPM,
                     self.MAX_RPM,
                 ]
-                for _ in range(self.NUM_DRONES)
             ]
         )
-        return spaces.Box(low=obs_lower_bound, high=obs_upper_bound, dtype=np.float32)
+        eyes_lower_bound, eyes_upper_bound = self.eyes.observation_space
+        return spaces.Box(
+            low=np.hstack(
+                (
+                    obs_lower_bound,
+                    eyes_lower_bound.reshape(1, self.eyes.vision_spec.segment_count),
+                )
+            ),
+            high=np.hstack(
+                (
+                    obs_upper_bound,
+                    eyes_upper_bound.reshape(1, self.eyes.vision_spec.segment_count),
+                )
+            ),
+            dtype=np.float32,
+        )
 
     def _compute_obs(self):
         """Returns the current observation of the environment.
 
-        For the value of the state, see the implementation of `_getDroneStateVector()`.
+        This contains drone kinematic state + observation from the eyes.
 
         Returns
         -------
         ndarray
-            An ndarray of shape (NUM_DRONES, 20) with the state of each drone.
+            An ndarray of shape (1, 20 + eyes dimension) with the state of each drone.
 
         """
-        return np.array(
-            [self._get_drone_state_vector(i) for i in range(self.NUM_DRONES)]
-        )
+        kinematic_state = self._get_drone_state_vector(0)
+        visual_obs = self.eyes.blink(kinematic_state[0:3], self.orientation_plane[:2])
+
+        observation_vec_len = kinematic_state.shape[0] + visual_obs.shape[0]
+        return np.hstack((kinematic_state, visual_obs)).reshape(1, observation_vec_len)
 
     def _preprocess_action(self, action):
         """Pre-processes the action passed to `.step()` into motors' RPMs.
@@ -172,13 +185,11 @@ class CtrlAviary(BaseAviary):
         Returns
         -------
         ndarray
-            (NUM_DRONES, 4)-shaped array of ints containing to clipped RPMs
+            (1, 4)-shaped array of ints containing to clipped RPMs
             commanded to the 4 motors of each drone.
 
         """
-        return np.array(
-            [np.clip(action[i, :], 0, self.MAX_RPM) for i in range(self.NUM_DRONES)]
-        )
+        return np.array([np.clip(action[0, :], 0, self.MAX_RPM)])
 
     def _compute_reward(self):
         """Computes the current reward value(s).

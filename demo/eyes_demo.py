@@ -20,6 +20,7 @@ def see():
     init_pos = np.array([[0.3, 0.3, 0.0]])
 
     env = CtrlAviary(
+        eyes=Eyes(),
         initial_xyzs=init_pos,
         pyb_freq=phys_engine_freq_hz,
         ctrl_freq=pid_freq_hz,
@@ -31,7 +32,6 @@ def see():
         desired_speed_ms=0.1 * 3.6,
         ctrl_timestep=env.CTRL_TIMESTEP,
     )
-    eyes = Eyes()
 
     action = np.zeros((1, 4))  # RPM
     env.reset()
@@ -53,11 +53,7 @@ def see():
 
             if i % 25 == 0:
                 clear_console()
-                print(
-                    list(
-                        np.round(eyes.blink(obs[0, 0:3], env.orientation_plane[:2]), 6)
-                    )
-                )
+                print(list(np.round(obs[0, 21:], 6)))
             i += 1
     except KeyboardInterrupt:
         pass
