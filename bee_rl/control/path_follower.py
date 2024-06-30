@@ -28,6 +28,8 @@ class PathFollower(PIDControl):
 
     def compute_target_location(self, our_location: np.ndarray) -> np.ndarray:
         trajectory_size = self.trajectory.shape[0]
+        # This computation should be done smarter
+        # e.g. take curvature + rate of change into account
         look_ahead_idx = int(0.05 * trajectory_size)
 
         delta_coord = self.trajectory - our_location
