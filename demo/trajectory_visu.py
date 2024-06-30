@@ -12,7 +12,7 @@ def visualize():
 
     _, graph = TrajectoryFrame(traj_file_path).plot()
 
-    ref_trajectory = Trajectory.get_rollercoaster(n_z=4)
+    ref_trajectory = Trajectory.get_rollercoaster(Rxy=1.5, Rz=0.1, n_z=3)
     graph.plot(ref_trajectory.T[0], ref_trajectory.T[1], ref_trajectory.T[2])
 
     plt.show()

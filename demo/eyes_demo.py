@@ -5,7 +5,7 @@ from bee_rl.env import CtrlAviary
 from bee_rl.control import PathFollower
 from bee_rl.utils import sync
 from bee_rl.arena_elements import PositionElementGeneretor
-from bee_rl.eyes import Eyes
+from bee_rl.eyes import Eyes, VisionSpec
 from bee_rl.trajectory import Trajectory
 
 
@@ -17,19 +17,21 @@ def clear_console():
 def see():
     phys_engine_freq_hz = 1000  # 1ms
     pid_freq_hz = 200  # 5ms
-    init_pos = np.array([[0.3, 0.3, 0.0]])
+    init_pos = np.array([[1.0, 0.0, 0.0]])
 
     env = CtrlAviary(
-        eyes=Eyes(),
+        eyes=Eyes(VisionSpec(cutoff_distance_m=1.25)),
         initial_xyzs=init_pos,
         pyb_freq=phys_engine_freq_hz,
         ctrl_freq=pid_freq_hz,
         gui=True,
-        obstacle_generator=PositionElementGeneretor([(0.0, 0.0)]),
+        obstacle_generator=PositionElementGeneretor(
+            [(0.5, 0.0), (-0.5, 0.0), (0.0, 0.5), (0.0, -0.5)]
+        ),
     )
     controller = PathFollower(
-        Trajectory.get_rollercoaster(Rxy=0.2, Z=0.2, Rz=0),
-        desired_speed_ms=0.1 * 3.6,
+        Trajectory.get_rollercoaster(Rxy=1.5, Z=0.2),
+        desired_speed_ms=0.5 * 3.6,
         ctrl_timestep=env.CTRL_TIMESTEP,
     )
 
