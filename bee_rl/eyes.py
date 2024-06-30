@@ -59,7 +59,9 @@ class Eyes:
         for idx, (obstacle_id, _, _, hit_pos, _) in enumerate(collision_measurement):
             if obstacle_id == -1:
                 continue
-            self.observation[idx] = np.linalg.norm(np.array(hit_pos) - our_pos)
+            self.observation[idx] = self.vision_spec.cutoff_distance_m - np.linalg.norm(
+                np.array(hit_pos) - our_pos
+            )
 
         return self.observation
 
