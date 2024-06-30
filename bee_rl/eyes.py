@@ -9,13 +9,11 @@ class VisionSpec(NamedTuple):
     Params:
         angle: float              - observation angle
         segment_count: int        - number of segments used to discretize the angle
-        clarity_drop_per_m: float - weight used to deminish the observation far away
         cutoff_distance_m: float  - we do not observe beyond this distance
     """
 
     angle: float = 360.0 * np.pi / 180.0
     segment_count: int = 20
-    clarity_drop_per_m: float = 0.1
     cutoff_distance_m: float = 1.0
 
 
