@@ -188,14 +188,10 @@ class PIDControl(BaseControl):
             math.sqrt(scalar_thrust / (4 * self.KF)) - self.PWM2RPM_CONST
         ) / self.PWM2RPM_SCALE
         target_z_ax = target_thrust / np.linalg.norm(target_thrust)
-        target_x_c = np.array([math.cos(target_rpy[2]), math.sin(target_rpy[2]), 0])
-        target_y_ax = np.cross(target_z_ax, target_x_c) / np.linalg.norm(
-            np.cross(target_z_ax, target_x_c)
-        )
-        target_x_ax = np.cross(target_y_ax, target_z_ax)
-        target_rotation = (
-            np.vstack([target_x_ax, target_y_ax, target_z_ax])
-        ).transpose()
+        vel_unit = target_vel / np.linalg.norm(target_vel)
+        target_x_ax = vel_unit - np.dot(target_z_ax, vel_unit) * target_z_ax
+        target_y_ax = np.cross(target_z_ax, target_x_ax)
+        target_rotation = np.vstack((target_x_ax, target_y_ax, target_z_ax)).T
         #### Target rotation #######################################
         target_euler = (Rotation.from_matrix(target_rotation)).as_euler(
             "XYZ", degrees=False
