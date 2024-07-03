@@ -456,7 +456,7 @@ class BaseAviary(gym.Env):
         #### Prepare the return values #############################
         obs = self._compute_obs()
         reward = self._compute_reward()
-        terminated = reward <= -5
+        terminated = reward <= -5 or self.step_counter > 10_000
         truncated = self._compute_truncated()
         info = self._compute_info()
         #### Advance the step counter ##############################

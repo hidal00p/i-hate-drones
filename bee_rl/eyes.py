@@ -18,7 +18,6 @@ class VisionSpec(NamedTuple):
 
 
 class Eyes:
-
     def __init__(self, vision_spec: VisionSpec = VisionSpec()):
         self.vision_spec = vision_spec
         self.setup_eyes()

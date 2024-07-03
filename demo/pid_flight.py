@@ -25,7 +25,6 @@ def fly():
     ref_trajectory = Trajectory.get_rollercoaster(Rxy=1.5, Rz=0.1, n_z=3)
     desired_speed_ms = 0.5 * 3.6
     controller = PathFollower(ref_trajectory, desired_speed_ms, env.CTRL_TIMESTEP)
-    env.trajectory = controller.trajectory
 
     action = np.zeros((1, 4))  # RPM
     env.reset()
@@ -35,7 +34,6 @@ def fly():
     i = 0
     try:
         while True:
-
             # Step the simulation
             obs = env.step(action)[0]
 

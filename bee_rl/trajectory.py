@@ -4,7 +4,6 @@ from bee_rl.utils import NameSpace
 
 
 class Trajectory(NameSpace):
-
     @classmethod
     def get_rollercoaster(
         _,

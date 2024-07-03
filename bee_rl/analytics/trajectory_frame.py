@@ -7,7 +7,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 class TrajectoryFrame:
-
     def __init__(self, traj_log_path: pathlib.Path | str):
         with open(traj_log_path, "r") as traj_file:
             trajectory_buffer = []

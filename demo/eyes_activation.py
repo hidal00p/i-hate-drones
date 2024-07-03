@@ -42,7 +42,6 @@ def see():
     i = 0
     try:
         while True:
-
             # Step the simulation
             obs = env.step(action)[0]
 

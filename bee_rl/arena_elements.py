@@ -4,7 +4,6 @@ import numpy as np
 
 
 class ElementGenerator:
-
     _elements: np.ndarray
 
     @abstractmethod

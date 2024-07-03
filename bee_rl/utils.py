@@ -55,7 +55,6 @@ def configure_telemetry_logger():
 
 
 class NameSpace:
-
     def __new__(cls, *args, **kwargs):
         raise RuntimeError(
             f"{cls.__name__} is meant only as a namespace. It is not meant for object instantiation."

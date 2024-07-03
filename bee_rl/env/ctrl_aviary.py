@@ -34,6 +34,7 @@ class CtrlAviary(BaseAviary):
         self.eyes = eyes
         self.obstacle_generator = obstacle_generator
         self.target_generator = target_generator
+        self._trajectory = None
         super().__init__(
             drone_model=drone_model,
             num_drones=1,
@@ -192,25 +193,7 @@ class CtrlAviary(BaseAviary):
         return np.array([np.clip(action[0, :], 0, self.MAX_RPM)])
 
     def _compute_reward(self):
-        obs: np.ndarray = self._compute_obs()[0]
-
-        # penalty for proximity to obstacles
-        eye_saturation_penalty = (
-            -1
-            * (obs[21:]).sum()
-            / self.eyes.vision_spec.cutoff_distance_m
-            / self.eyes.vision_spec.segment_count
-        )
-
-        # penalty for being off-trajectory
-        deviation: np.ndarray = self.trajectory - obs[:3]
-        min_deviation = np.min((deviation * deviation).sum(axis=1))
-        off_traj_penalty = np.exp(-min_deviation) - 1.0
-
-        # collision penalty
-        collision_penalty = -5 * (obs[21:] < 0.05).any()
-
-        return eye_saturation_penalty + off_traj_penalty + collision_penalty
+        return -1
 
     def _compute_terminated(self):
         return False

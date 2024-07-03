@@ -3,7 +3,6 @@ from .pid import PIDControl
 
 
 class PathFollower(PIDControl):
-
     def __init__(
         self, trajectory: np.ndarray, desired_speed_ms: float, ctrl_timestep: float
     ):

@@ -1,5 +1,5 @@
 from .base_aviary import BaseAviary
-from .base_rl_aviary import BaseRLAviary
 from .ctrl_aviary import CtrlAviary
+from .rl_aviary import RLAviary
 
-__all__ = ["BaseAviary", "BaseRLAviary", "CtrlAviary"]
+__all__ = ["BaseAviary", "RLAviary", "CtrlAviary"]
