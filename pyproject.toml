@@ -5,3 +5,18 @@ build-backend = "hatchling.build"
 [project]
 name = "bee_rl"
 version = "0.0.1"
+requires-python = ">= 3.9"
+dependencies = [
+    "pybullet",
+    "numpy==1.26.4",
+    "matplotlib",
+    "stable_baselines3",
+    "gymnasium[box2d]",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "mypy",
+    "pytest",
+]
