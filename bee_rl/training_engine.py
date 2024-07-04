@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import numpy as np
 from stable_baselines3 import SAC, DDPG, PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.callbacks import BaseCallback
 
 from bee_rl.trajectory import Trajectory
 from bee_rl.arena_elements import PositionElementGeneretor
@@ -84,11 +85,14 @@ class TrainingEngine:
             self.vec_env.close()
 
     def train(self):
+        total_ts = self.training_args.av_ep_len * self.training_args.n_episodes
+        save_freq = total_ts // self.training_args.n_cpus // 10
         with self.safe_operation():
-            total_timesteps = (
-                self.training_args.av_ep_len * self.training_args.n_episodes
+            self.model.learn(
+                total_timesteps=total_ts,
+                log_interval=15,
+                callback=_SaveModelCallback(save_freq=save_freq, training_engine=self),
             )
-            self.model.learn(total_timesteps=total_timesteps, log_interval=15)
 
     @property
     def persistence_dir(self) -> pathlib.Path:
@@ -103,3 +107,17 @@ class TrainingEngine:
     @property
     def meta_file(self) -> pathlib.Path:
         return self.persistence_dir / f"{self.training_args.algo.value}.meta"
+
+
+class _SaveModelCallback(BaseCallback):
+
+    def __init__(self, save_freq: int, training_engine: TrainingEngine):
+        self.training_engine = training_engine
+        self.save_freq = save_freq
+        super().__init__()
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.save_freq == 0:
+            self.training_engine.model.save(self.training_engine.model_file)
+
+        return True
