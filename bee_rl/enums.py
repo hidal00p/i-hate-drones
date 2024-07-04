@@ -44,3 +44,9 @@ class ObservationType(Enum):
 
     KIN = "kin"  # Kinematic information (pose, linear and angular velocities)
     RGB = "rgb"  # RGB camera capture in each drone's POV
+
+
+class Algorithm(Enum):
+    SAC = "SAC"
+    PPO = "PPO"
+    DDPG = "DDPG"

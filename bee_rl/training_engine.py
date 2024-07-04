@@ -1,15 +1,17 @@
 import pathlib
 from contextlib import contextmanager
-from enum import Enum
 
 import numpy as np
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, DDPG, PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
+
 from bee_rl.trajectory import Trajectory
 from bee_rl.arena_elements import PositionElementGeneretor
 from bee_rl.eyes import Eyes, VisionSpec
 from bee_rl.control import PathFollower
 from bee_rl.env import RLAviary
+from bee_rl.args import TrainingArgs
+from bee_rl.enums import Algorithm
 
 
 def make_env() -> RLAviary:
@@ -44,28 +46,29 @@ def make_env() -> RLAviary:
     return _init
 
 
-class Algorithm(Enum):
-    SAC = "SAC"
-    PPO = "PPO"
-    DDPG = "DDPG"
-
-
 class TrainingEngine:
 
-    def __init__(
-        self,
-        n_cpus: int = 4,
-        algorithm: Algorithm = Algorithm.SAC,
-        total_timesteps: int = 2_500_000,  # ~250 episodes
-    ):
-        self.n_cpus = n_cpus
-        self.algorithm = algorithm
-        self.total_timesteps = total_timesteps
+    def __init__(self, training_args: TrainingArgs):
+        self.training_args = training_args
         self._init_env()
 
     def _init_env(self):
-        self.vec_env = SubprocVecEnv([make_env()] * self.n_cpus)
-        self.model = SAC("MlpPolicy", self.vec_env, verbose=1)
+        n_cpus = self.training_args.n_cpus
+        self.vec_env = SubprocVecEnv([make_env()] * n_cpus)
+
+        if self.training_args.algo == Algorithm.SAC:
+            self.model = SAC("MlpPolicy", self.vec_env, verbose=1)
+            return
+
+        if self.training_args.algo == Algorithm.DDPG:
+            self.model = DDPG("MlpPolicy", self.vec_env, verbose=1)
+            return
+
+        if self.training_args.algo == Algorithm.PPO:
+            self.model = PPO("MlpPolicy", self.vec_env, verbose=1)
+            return
+
+        raise RuntimeError(f"{self.training_args.algo.value} is unsupported.")
 
     @contextmanager
     def safe_operation(self):
@@ -77,15 +80,26 @@ class TrainingEngine:
         except Exception:
             pass
         finally:
-            self.model.save(self.persistence_path)
+            self.model.save(self.model_file)
             self.vec_env.close()
 
     def train(self):
         with self.safe_operation():
-            self.model.learn(total_timesteps=self.total_timesteps, log_interval=15)
+            total_timesteps = (
+                self.training_args.av_ep_len * self.training_args.n_episodes
+            )
+            self.model.learn(total_timesteps=total_timesteps, log_interval=15)
 
     @property
-    def persistence_path(self) -> pathlib.Path:
+    def persistence_dir(self) -> pathlib.Path:
         directory = pathlib.Path("training_results")
         directory.mkdir(exist_ok=True)
-        return directory / f"{self.algorithm.value}.model"
+        return directory
+
+    @property
+    def model_file(self) -> pathlib.Path:
+        return self.persistence_dir / f"{self.training_args.algo.value}.model"
+
+    @property
+    def meta_file(self) -> pathlib.Path:
+        return self.persistence_dir / f"{self.training_args.algo.value}.meta"
