@@ -1,6 +1,6 @@
 import pathlib
 from contextlib import contextmanager
-from enum import StrEnum
+from enum import Enum
 
 import numpy as np
 from stable_baselines3 import SAC
@@ -44,7 +44,7 @@ def make_env() -> RLAviary:
     return _init
 
 
-class Algorithm(StrEnum):
+class Algorithm(Enum):
     SAC = "SAC"
     PPO = "PPO"
     DDPG = "DDPG"
@@ -88,4 +88,4 @@ class TrainingEngine:
     def persistence_path(self) -> pathlib.Path:
         directory = pathlib.Path("training_results")
         directory.mkdir(exist_ok=True)
-        return directory / f"{self.algorithm}.model"
+        return directory / f"{self.algorithm.value}.model"
