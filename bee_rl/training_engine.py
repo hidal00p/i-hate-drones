@@ -15,15 +15,15 @@ from bee_rl.args import TrainingArgs
 from bee_rl.enums import Algorithm
 
 
-def make_env() -> RLAviary:
-    def _init():
+def make_env(gui=False):
+    def _init() -> RLAviary:
         """
         Generates default RL env suitable for training.
         """
         env = RLAviary(
             initial_xyzs=np.random.random((1, 3)),
             eyes=Eyes(VisionSpec(angle=120 * np.pi / 180)),
-            gui=False,
+            gui=gui,
             pyb_freq=1000,
             ctrl_freq=250,
             obstacle_generator=PositionElementGeneretor(
