@@ -9,7 +9,7 @@ from bee_rl.trajectory import Trajectory
 
 
 def fly():
-    gui = False
+    gui = True
     phys_engine_freq_hz = 1000  # 1ms
     pid_freq_hz = 200  # 5ms
     init_pos = np.random.rand(1, 3) * 1.5
