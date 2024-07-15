@@ -74,3 +74,7 @@ If more fine grained configuration is desired, e.g.
 Then currently there is no way around diving a bit into the code.
 To taylor training to your needs more please see the implementation of the 
 `bee_rl/training_engine.py:TrainingEngine`
+
+## References
+
+- [gym-pybullet-drones](https://arxiv.org/abs/2103.02142)
